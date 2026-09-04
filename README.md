@@ -97,8 +97,10 @@ Deliberate losses, so none of these surprise you later:
 the key. Free it under *System Settings > Keyboard > Keyboard Shortcuts > Spotlight*, or skip that
 binding and use `option+escape`, which needs no system changes at all.
 
-**Why not just use `ctrl+space`, which VS Code already ships?** Fair question, and it really is
-bound out of the box: Trigger Suggest registers `mac: { primary: ctrl|Space }`, making `ctrl+space`
+### Why not just use `ctrl+space`? 
+
+Fair question, and it really is bound out of the box:
+Trigger Suggest registers `mac: { primary: ctrl|Space }`, making `ctrl+space`
 the macOS primary. No entry in this file is needed for it.
 
 The catch is that macOS claims the same key. Per Apple, `Control+Space` selects the **previous
@@ -115,11 +117,6 @@ Worth knowing before you spend time on it: this is a long-standing mess. There i
 issue](https://github.com/microsoft/vscode/issues/198504) where `ctrl+space` reaches the OS fine,
 registering in System Settings' own shortcut recorder, yet never arrives in VS Code.
 In that case, no local config will help you.
-
-**Two `cmd+i` entries look redundant but are not.** `-inlineChat.start` appears twice, once with
-the verbatim default `when` clause and once bare. The bare one does the real work, because a
-removal without a `when` clause kills every default binding for that key and command pair
-regardless of context.
 
 ## Reverting
 
