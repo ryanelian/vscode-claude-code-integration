@@ -27,6 +27,18 @@
 //      for one key with a matching when-clause, the LAST positive binding
 //      wins, so take care when adding a second positive entry for a key that
 //      already has one.
+//   4. NO removal in this file carries a when-clause, and that is deliberate.
+//      The Keyboard Shortcuts UI writes removals by copying the default's
+//      resolved clause verbatim, which produces the long duplicated strings
+//      people are used to seeing, since VS Code prints clauses in disjunctive
+//      normal form and repeats every shared term across the branches. Those
+//      copies are worse than useless: the resolver only drops a default when
+//      its clause is ENTIRELY INCLUDED in the removal's clause, so the day
+//      VS Code adds one term to a default, the copied removal silently stops
+//      matching and the key quietly goes back to its old behaviour. A bare
+//      removal skips that check altogether and matches any default on the
+//      key. Positive entries below DO keep their clauses, because there the
+//      clause is what decides when the command actually runs.
 [
 	// ==========================================================================
 	// Windows and Visual Studio reflexes
@@ -52,8 +64,7 @@
 	// silently accept code instead of redoing.
 	{
 		"key": "cmd+y",
-		"command": "-chatEditor.action.acceptHunk",
-		"when": "chatEdits.cursorInChangeRange && chatEdits.hasEditorModifications && editorFocus && !chatEdits.isCurrentlyBeingModified || chatEdits.cursorInChangeRange && chatEdits.hasEditorModifications && notebookCellListFocused && !chatEdits.isCurrentlyBeingModified"
+		"command": "-chatEditor.action.acceptHunk"
 	},
 	// WHY cmd+space: a Visual Studio reflex. VS puts Complete Word on a
 	// modifier plus the space bar, and cmd+space is the mac shape of that, so
@@ -81,8 +92,7 @@
 	// with the AI removals below, even though it serves the same end.
 	{
 		"key": "cmd+i",
-		"command": "-editor.action.triggerSuggest",
-		"when": "editorHasCompletionItemProvider && textInputFocus && !editorReadonly && !suggestWidgetVisible"
+		"command": "-editor.action.triggerSuggest"
 	},
 	// Visual Studio idiom: Ctrl+K, Ctrl+D formats the document, and VS pairs
 	// it with Ctrl+K, Ctrl+F for Format Selection.
@@ -124,23 +134,12 @@
 	// at all. Delete this entry if ctrl+cmd+i is ever wanted back.
 	{
 		"key": "ctrl+cmd+i",
-		"command": "-workbench.action.chat.open",
-		"when": "!chatSetupDisabled && !chatSetupHidden"
+		"command": "-workbench.action.chat.open"
 	},
-	// Clears cmd+i from Inline Chat in editors and notebooks. This copies the
-	// default when-clause verbatim. The broader unconditional removal further
-	// down is what actually covers every case.
-	{
-		"key": "cmd+i",
-		"command": "-inlineChat.start",
-		"when": "editorFocus && inlineChatHasEditsAgent && inlineChatPossible && !editorReadonly && !editorSimpleInput || editorFocus && inlineChatHasNotebookAgent && inlineChatPossible && !editorReadonly && !editorSimpleInput && activeEditor == 'workbench.editor.notebook' || editorFocus && inlineChatHasNotebookInline && inlineChatPossible && !editorReadonly && !editorSimpleInput && activeEditor == 'workbench.editor.notebook'"
-	},
-	// An unconditional sweep of every remaining AI feature that claims cmd+i.
-	// These have no when-clause on purpose, because a bare "-" removal kills
-	// ALL default bindings for that key and command pair whatever their
-	// context. In order, they cover inline chat in a text editor, escalating
-	// inline chat into the chat panel, inline chat inside a notebook cell, and
-	// the AI search box in the Settings editor.
+	// A sweep of every remaining AI feature that claims cmd+i. In order, they
+	// cover inline chat in a text editor, escalating inline chat into the chat
+	// panel, inline chat inside a notebook cell, and the AI search box in the
+	// Settings editor.
 	{
 		"key": "cmd+i",
 		"command": "-inlineChat.start"
