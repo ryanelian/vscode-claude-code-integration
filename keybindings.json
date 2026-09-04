@@ -1,0 +1,235 @@
+// Ryan's VS Code key bindings. These override the defaults.
+//
+// Themes running through this file:
+//   1. Several Windows and Visual Studio reflexes are reproduced on purpose
+//      (cmd+space to complete, cmd+y to redo, ctrl+k ctrl+d to format),
+//      since macOS and VS Code both default elsewhere. Cursor is the daily
+//      driver here, so these also keep the two editors in sync. Where the
+//      platform default is harmless it is left in place, so redo answers to
+//      both cmd+y and shift+cmd+z, and formatting to both ctrl+k ctrl+d and
+//      shift+option+f.
+//   2. cmd+i belongs to Claude Code, not to any built-in AI feature.
+//      WHY cmd+i specifically: it is pure reflex. VS Code's built-in chat
+//      (Copilot) and Cursor BOTH use cmd+i to pull the current file or the
+//      selected code into the AI conversation, so after enough hours the
+//      fingers already mean "send this code to the assistant" when they hit
+//      it. Claude Code is genuinely hard to work with when cmd+i does not do
+//      the same thing, because the reflex fires, the wrong panel opens, and
+//      the selection is lost. Hence the trade in this file: Claude Code gets
+//      cmd+i, and every built-in feature that wants the key loses it. A lot
+//      of commands fight for cmd+i, which is why most of the "-" removal
+//      entries below exist purely to clear it.
+//   3. The file is grouped into two sections: the Windows and Visual Studio
+//      reflexes first, then everything AI related. Grouping is safe because a
+//      "-" removal is gathered in a pre-pass and only ever filters DEFAULT
+//      bindings, so its position in the file is irrelevant and it can never
+//      delete a positive entry written here. What does still matter is that
+//      for one key with a matching when-clause, the LAST positive binding
+//      wins, so take care when adding a second positive entry for a key that
+//      already has one.
+[
+	// ==========================================================================
+	// Windows and Visual Studio reflexes
+	// These come first because they are the oldest habits in the file and the
+	// least likely to change. Each entry below carries a MAC DEFAULT STILL
+	// AVAILABLE line naming the native key it sits alongside, since none of
+	// these additions removes the platform way of doing the same thing.
+	// ==========================================================================
+	// Windows and Visual Studio muscle memory: ctrl+y means redo.
+	// This entry is needed because VS Code registers redo as
+	//   { primary: cmd|Y, secondary: [shift|cmd|Z], mac: { primary: shift|cmd|Z } }
+	// and the mac block REPLACES the whole rule, so on macOS cmd+y ends up
+	// genuinely unbound and no "-" removal is required here.
+	// MAC DEFAULT STILL AVAILABLE: shift+cmd+z, the platform convention for
+	// redo, is deliberately left in place. Redo therefore answers to two keys
+	// and whichever hand gets there first is fine.
+	{
+		"key": "cmd+y",
+		"command": "redo"
+	},
+	// Frees cmd+y. While reviewing AI-proposed edits, the chat editor
+	// otherwise hijacks cmd+y to accept the hunk under the cursor, which would
+	// silently accept code instead of redoing.
+	{
+		"key": "cmd+y",
+		"command": "-chatEditor.action.acceptHunk",
+		"when": "chatEdits.cursorInChangeRange && chatEdits.hasEditorModifications && editorFocus && !chatEdits.isCurrentlyBeingModified || chatEdits.cursorInChangeRange && chatEdits.hasEditorModifications && notebookCellListFocused && !chatEdits.isCurrentlyBeingModified"
+	},
+	// WHY cmd+space: a Visual Studio reflex. VS puts Complete Word on a
+	// modifier plus the space bar, and cmd+space is the mac shape of that, so
+	// it becomes the "complete this" key here too. Moving IntelliSense onto it
+	// also frees cmd+i, which VS Code otherwise claims for Trigger Suggest on
+	// macOS.
+	// The price is Spotlight, which owns cmd+space and wins before VS Code
+	// ever sees the key, so it MUST be unbound or remapped under System
+	// Settings > Keyboard > Keyboard Shortcuts > Spotlight for this binding to
+	// work at all. Spotlight is a fair thing to give up, having easy
+	// replacements.
+	// MAC DEFAULT STILL AVAILABLE: option+escape, the old Cocoa complete word
+	// key, which VS Code ships as a mac secondary for Trigger Suggest. It
+	// needs no System Settings changes whatsoever, which makes it the reliable
+	// fallback if Spotlight ever reclaims cmd+space. Only the cmd+i secondary
+	// is taken away, in the entry just below.
+	{
+		"key": "cmd+space",
+		"command": "editor.action.triggerSuggest",
+		"when": "editorHasCompletionItemProvider && textInputFocus && !editorReadonly && !suggestWidgetVisible"
+	},
+	// The other half of the move above: remove the macOS default, which puts
+	// Trigger Suggest on cmd+i. This is the one non-AI command that was
+	// competing for cmd+i, which is why it sits in this section rather than
+	// with the AI removals below, even though it serves the same end.
+	{
+		"key": "cmd+i",
+		"command": "-editor.action.triggerSuggest",
+		"when": "editorHasCompletionItemProvider && textInputFocus && !editorReadonly && !suggestWidgetVisible"
+	},
+	// Visual Studio idiom: Ctrl+K, Ctrl+D formats the document, and VS pairs
+	// it with Ctrl+K, Ctrl+F for Format Selection.
+	// The trade-off is that this makes ctrl+k a CHORD PREFIX, so in editors
+	// that have a formatter, pressing ctrl+k now waits for a second key
+	// instead of running the macOS and VS Code default of ctrl+k as
+	// deleteAllRight, the emacs kill to end of line. That kill still works in
+	// the terminal, the find box, and other inputs.
+	// Nothing is really lost there either, because Delete All Right is
+	// registered with two mac keys, mac: { primary: ctrl|K, secondary:
+	// [cmd|Delete] }, and only the first is shadowed. cmd plus forward delete,
+	// which is cmd+fn+delete on a laptop keyboard, still runs it inside the
+	// editor. Note it is a plain edit and not a true emacs kill: nothing is
+	// stored anywhere, so only undo brings the text back, never a yank.
+	// MAC DEFAULT STILL AVAILABLE: shift+option+f, VS Code's own Format
+	// Document key, is deliberately left alone. The document can be formatted
+	// either way, so nothing has to be unlearned to sit at someone else's
+	// machine.
+	{
+		"key": "ctrl+k ctrl+d",
+		"command": "editor.action.formatDocument",
+		"when": "editorHasDocumentFormattingProvider && editorTextFocus && !editorReadonly && !inCompositeEditor"
+	},
+	// ==========================================================================
+	// AI keys, and clearing cmd+i for Claude Code
+	// Everything below either takes cmd+i away from a built-in AI feature or
+	// hands it to Claude Code. See theme 2 at the top for the reasoning.
+	// ==========================================================================
+	// Defensive: guarantee cmd+i never opens VS Code's built-in chat.
+	// Today "Open Chat" is registered on ctrl+cmd+i on macOS, so this removes
+	// nothing. It is here so that a future VS Code release which moves chat
+	// onto cmd+i cannot take the key back.
+	{
+		"key": "cmd+i",
+		"command": "-workbench.action.chat.open"
+	},
+	// Removes the REAL macOS default for "Chat: Open", whose mac primary is
+	// ctrl+cmd+i. Net effect: built-in VS Code chat has no keyboard shortcut
+	// at all. Delete this entry if ctrl+cmd+i is ever wanted back.
+	{
+		"key": "ctrl+cmd+i",
+		"command": "-workbench.action.chat.open",
+		"when": "!chatSetupDisabled && !chatSetupHidden"
+	},
+	// Clears cmd+i from Inline Chat in editors and notebooks. This copies the
+	// default when-clause verbatim. The broader unconditional removal further
+	// down is what actually covers every case.
+	{
+		"key": "cmd+i",
+		"command": "-inlineChat.start",
+		"when": "editorFocus && inlineChatHasEditsAgent && inlineChatPossible && !editorReadonly && !editorSimpleInput || editorFocus && inlineChatHasNotebookAgent && inlineChatPossible && !editorReadonly && !editorSimpleInput && activeEditor == 'workbench.editor.notebook' || editorFocus && inlineChatHasNotebookInline && inlineChatPossible && !editorReadonly && !editorSimpleInput && activeEditor == 'workbench.editor.notebook'"
+	},
+	// An unconditional sweep of every remaining AI feature that claims cmd+i.
+	// These have no when-clause on purpose, because a bare "-" removal kills
+	// ALL default bindings for that key and command pair whatever their
+	// context. In order, they cover inline chat in a text editor, escalating
+	// inline chat into the chat panel, inline chat inside a notebook cell, and
+	// the AI search box in the Settings editor.
+	{
+		"key": "cmd+i",
+		"command": "-inlineChat.start"
+	},
+	{
+		"key": "cmd+i",
+		"command": "-inlineChat.askInChat"
+	},
+	{
+		"key": "cmd+i",
+		"command": "-notebook.cell.chat.start"
+	},
+	{
+		"key": "cmd+i",
+		"command": "-settings.action.toggleAiSearch"
+	},
+	// The payoff for all of the above, and the reason cmd+i was cleared in the
+	// first place. This is Claude Code's equivalent of the Copilot and Cursor
+	// cmd+i reflex: "take this code, now let's talk about it", off the same
+	// finger movement as the other two editors.
+	// The command is claude-vscode.focus rather than the more obvious
+	// claude-vscode.insertAtMention, because focus is the one that branches on
+	// the selection, which is the behaviour wanted here:
+	//   nothing highlighted, it just focuses Claude, or reveals and opens it
+	//     when no session is showing, and inserts nothing at all
+	//   something highlighted, it inserts an @-mention such as
+	//     "@src/foo.ts#L10-L20" into the Claude input, exactly as
+	//     insertAtMention would
+	// The internals are simply that focus builds an empty reference string
+	// when the selection is empty, and the webview only inserts text when the
+	// string is non-empty. insertAtMention has no such branch: with no
+	// selection it always inserts a bare "@src/foo.ts" whole-file reference,
+	// which is the one behaviour given up by this choice.
+	// Scoped to editorTextFocus so it only fires with an editor in front.
+	// Worth knowing: when Claude is waiting on a permission decision, the
+	// webview focuses that dialog instead of the input, so the keystroke
+	// answers the prompt rather than inserting anything.
+	// This does duplicate a key the extension already ships: focus is bound by
+	// default to cmd+escape, with blur on the same key from inside Claude, so
+	// cmd+i and cmd+escape now do the same thing on the way in. cmd+escape
+	// remains the only one that makes the round trip back to the editor.
+	{
+		"key": "cmd+i",
+		"command": "claude-vscode.focus",
+		"when": "editorTextFocus"
+	},
+	// Remove the extension's own default of alt+k for insertAtMention, so that
+	// cmd+i is the single key into Claude rather than one of two. Since cmd+i
+	// now runs focus instead, this leaves insertAtMention with no key at all.
+	// Delete this entry to get alt+k back as a dedicated whole-file mention
+	// key, which is the behaviour cmd+i no longer covers.
+	{
+		"key": "alt+k",
+		"command": "-claude-vscode.insertAtMention"
+	},
+	// Same again for the legacy command id. The extension still ships
+	// "claude-code.insertAtMentioned" on cmd+alt+k as a back-compat alias of
+	// "claude-vscode.insertAtMention", so this drops a redundant third
+	// binding for the same behaviour.
+	{
+		"key": "cmd+alt+k",
+		"command": "-claude-code.insertAtMentioned"
+	},
+	// VS Code binds cmd+shift+i, which is CtrlCmd|Shift|KeyI, to its built-in
+	// agent chat. Dropped, so that the key can go to Claude instead.
+	{
+		"key": "cmd+shift+i",
+		"command": "-workbench.action.chat.openAgent"
+	},
+	// cmd+shift+i opens a FRESH Claude Code session as a TAB in the current
+	// editor group. The command is deliberately primaryEditor.open rather than
+	// editor.open, because primaryEditor.open hardcodes
+	// createPanel(..., ViewColumn.Active) and so the panel lands in the active
+	// group like any other tab. editor.open passes no column, which sends
+	// createPanel() down its findUnusedColumn() branch and then runs
+	// workbench.action.lockEditorGroup, and that lock is what turns Claude
+	// into a dedicated side pane. editor.open also carries the side effect of
+	// setPreferredLocation("panel").
+	// For the record, the other two near-misses are editor.openLast, which
+	// reveals the EXISTING session, and newConversation, which only resets an
+	// already-focused Claude webview.
+	// Invoked from a keybinding this gets no session id, so createPanel()
+	// builds a brand-new conversation. Its branch for reusing an existing
+	// Claude group only runs when the column is undefined, so repeated presses
+	// stack fresh Claude tabs in the working group rather than reusing one.
+	// Note that the extension's own cmd+shift+escape still runs editor.open,
+	// which is the locked side pane variant, should that ever be wanted.
+	{
+		"key": "cmd+shift+i",
+		"command": "claude-vscode.primaryEditor.open"
+	}
+]

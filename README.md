@@ -1,2 +1,125 @@
 # vscode-claude-code-integration
-Keybindings for Visual Studio Code to use Claude Code
+
+Keyboard bindings that make **Claude Code feel native in VS Code on macOS**, for people whose
+fingers came from Visual Studio, Cursor, or GitHub Copilot Chat.
+
+The whole thing is one file: [`keybindings.json`](./keybindings.json). It is heavily commented, so
+the file itself is the real documentation. This README covers what it does and how to install it.
+
+## The problem it solves
+
+`cmd+i` is muscle memory. VS Code's built-in chat (Copilot) and Cursor both use it to pull the
+current file or the selected code into the AI conversation. After enough hours, the fingers
+already mean *"send this code to the assistant"* when they hit that key.
+
+Claude Code is genuinely awkward to use when `cmd+i` does something else: the reflex fires, the
+wrong panel opens, and the selection is lost. So this config makes the trade explicit. Claude Code
+gets `cmd+i`, and every built-in feature competing for the key gives it up.
+
+A second, smaller theme: a few Windows and Visual Studio habits are reproduced on purpose, because
+macOS and VS Code both default elsewhere. Where the platform default is harmless it is kept, so
+nothing has to be unlearned to sit at someone else's machine.
+
+## Requirements
+
+- macOS
+- VS Code
+- The **Claude Code** extension (`anthropic.claude-code`), which provides every `claude-vscode.*`
+  command referenced below
+- **Spotlight's `cmd+space` shortcut disabled or remapped**, if you want the IntelliSense binding.
+  See [Gotchas](#gotchas).
+
+## Install
+
+1. Open the Command Palette with **`cmd+shift+p`**.
+   (If you prefer `cmd+p`, type a leading `>` to switch it into command mode.)
+2. Run **`Preferences: Open Keyboard Shortcuts (JSON)`**.
+   Note the **(JSON)** part. The entry without it opens the graphical editor, which is not what
+   you want here.
+3. Replace the contents of the file that opens with all of [`keybindings.json`](./keybindings.json).
+4. Save. VS Code applies keybindings on save, so there is no need to reload the window.
+
+## What you get
+
+### Claude Code
+
+| Key | Does |
+| --- | --- |
+| `cmd+i` | With a selection, sends `@src/foo.ts#L10-L20` to Claude's input. With no selection, just opens or focuses Claude. |
+| `cmd+shift+i` | Opens a **fresh** Claude Code session as a tab in the current editor group. |
+| `cmd+escape` | Extension default, not set here. Jumps into Claude's input, and back out to the editor. |
+
+`cmd+i` runs `claude-vscode.focus` rather than the more obvious `claude-vscode.insertAtMention`,
+because `focus` is the one that branches on whether anything is selected. The cost is that a bare
+`@src/foo.ts` whole-file mention is no longer available on that key.
+
+### Visual Studio and Windows reflexes
+
+| Key | Does | Native key that still works |
+| --- | --- | --- |
+| `cmd+y` | Redo | `shift+cmd+z` |
+| `cmd+space` | Trigger Suggest (IntelliSense) | `option+escape`, and `ctrl+space` once macOS lets go of it |
+| `ctrl+k ctrl+d` | Format Document | `shift+option+f` |
+
+## What it takes away
+
+Deliberate losses, so none of these surprise you later:
+
+- **Built-in VS Code chat has no keyboard shortcut at all.** The config removes
+  `workbench.action.chat.open` from `ctrl+cmd+i` (its real macOS default) and
+  `workbench.action.chat.openAgent` from `cmd+shift+i`. Delete those two entries to get them back.
+- **Inline Chat, Ask in Chat, notebook cell chat, and the Settings editor's AI search** all lose
+  `cmd+i`.
+- **`cmd+i` no longer triggers IntelliSense.** It is an undocumented secondary binding for Trigger
+  Suggest on macOS, which surprises most people. `cmd+space` and `option+escape` cover it.
+- **`ctrl+k` alone stops being Delete All Right** in editors that have a formatter, because
+  `ctrl+k ctrl+d` turns it into a chord prefix. `cmd+fn+delete` still runs that command, and the
+  kill still works in the terminal and other inputs.
+- **The `@`-mention command loses its own keys** (`alt+k` and the legacy `cmd+alt+k`), since
+  `cmd+i` is the single way in.
+
+## Gotchas
+
+**`cmd+space` will not work until Spotlight gives it up.** The OS wins before VS Code ever sees
+the key. Free it under *System Settings > Keyboard > Keyboard Shortcuts > Spotlight*, or skip that
+binding and use `option+escape`, which needs no system changes at all.
+
+**Why not just use `ctrl+space`, which VS Code already ships?** Fair question, and it really is
+bound out of the box: Trigger Suggest registers `mac: { primary: ctrl|Space }`, making `ctrl+space`
+the macOS primary. No entry in this file is needed for it.
+
+The catch is that macOS claims the same key. Per Apple, `Control+Space` selects the **previous
+input source**, the language switcher, with `Control+Option+Space` for the next one. Both live
+under *System Settings > Keyboard > Keyboard Shortcuts > Input Sources* as **"Select the previous
+input source"**.
+
+**You may have to log out or restart for it to take effect.**
+The shortcut stays reserved for the life of the login session, so testing
+it immediately after unchecking will look like the change did nothing. If a restart still does not
+free it, the reported fix is *Input Sources > Restore Defaults*, then reboot, after which the key
+works whether or not the box is ticked.
+
+Worth knowing before you spend time on it: this is a long-standing mess. There is an open VS Code
+issue where `ctrl+space` reaches the OS fine, registering in System Settings' own shortcut
+recorder, yet never arrives in VS Code. If it works in TextEdit or a terminal but not in the
+editor, you have hit that and no local config will help.
+
+**Two `cmd+i` entries look redundant but are not.** `-inlineChat.start` appears twice, once with
+the verbatim default `when` clause and once bare. The bare one does the real work, because a
+removal without a `when` clause kills every default binding for that key and command pair
+regardless of context.
+
+## Reverting
+
+Keybindings are a single file with no other state. To undo everything, empty it:
+
+```json
+// Place your key bindings in this file to override the defaults
+[]
+```
+
+Save, and every VS Code default is back.
+
+## License
+
+[Apache License 2.0](./LICENSE).
