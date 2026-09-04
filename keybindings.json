@@ -174,7 +174,6 @@
 	// string is non-empty. insertAtMention has no such branch: with no
 	// selection it always inserts a bare "@src/foo.ts" whole-file reference,
 	// which is the one behaviour given up by this choice.
-	// Scoped to editorTextFocus so it only fires with an editor in front.
 	// Worth knowing: when Claude is waiting on a permission decision, the
 	// webview focuses that dialog instead of the input, so the keystroke
 	// answers the prompt rather than inserting anything.
@@ -184,8 +183,7 @@
 	// remains the only one that makes the round trip back to the editor.
 	{
 		"key": "cmd+i",
-		"command": "claude-vscode.focus",
-		"when": "editorTextFocus"
+		"command": "claude-vscode.focus"
 	},
 	// Remove the extension's own default of alt+k for insertAtMention, so that
 	// cmd+i is the single key into Claude rather than one of two. Since cmd+i

@@ -24,12 +24,30 @@ nothing has to be unlearned to sit at someone else's machine.
 
 - macOS
 - VS Code
-- The **Claude Code** extension (`anthropic.claude-code`), which provides every `claude-vscode.*`
-  command referenced below
+- The [**Claude Code** extension](https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code)
+  (`anthropic.claude-code`), which provides every `claude-vscode.*` command referenced below.
+  From a terminal: `code --install-extension anthropic.claude-code`
 - **Spotlight's `cmd+space` shortcut disabled or remapped**, if you want the IntelliSense binding.
   See [Gotchas](#gotchas).
 
 ## Install
+
+### 1. From the CLI
+
+Backs up whatever is there now, then overwrites it:
+
+```sh
+DEST="$HOME/Library/Application Support/Code/User/keybindings.json"
+cp "$DEST" "$DEST.bak" 2>/dev/null
+curl -fsSL https://github.com/ryanelian/vscode-claude-code-integration/raw/refs/heads/main/keybindings.json -o "$DEST"
+```
+
+The `-f` matters: without it, curl happily writes an HTML error page into your keybindings on a
+bad URL or a network hiccup. If something goes wrong, `mv "$DEST.bak" "$DEST"` puts it back.
+
+VS Code picks the file up on write, so there is nothing to reload.
+
+### 2. Via the Command Palette
 
 1. Open the Command Palette with **`cmd+shift+p`**.
    (If you prefer `cmd+p`, type a leading `>` to switch it into command mode.)
@@ -93,11 +111,10 @@ input source**, the language switcher, with `Control+Option+Space` for the next 
 under *System Settings > Keyboard > Keyboard Shortcuts > Input Sources* as **"Select the previous
 input source"**.
 
-**You may have to log out or restart for it to take effect.**
-The shortcut stays reserved for the life of the login session, so testing
-it immediately after unchecking will look like the change did nothing. If a restart still does not
-free it, the reported fix is *Input Sources > Restore Defaults*, then reboot, after which the key
-works whether or not the box is ticked.
+**You may need to log out or restart for it to take effect.**
+Testing it immediately after unchecking may look like the change did nothing.
+If a restart still does not free it, the reported fix is *Input Sources > Restore Defaults*,
+then reboot, after which the key works whether or not the box is ticked.
 
 Worth knowing before you spend time on it: this is a long-standing mess. There is an open VS Code
 issue where `ctrl+space` reaches the OS fine, registering in System Settings' own shortcut
