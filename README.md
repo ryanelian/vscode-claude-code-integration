@@ -65,11 +65,6 @@ VS Code picks the file up on write, so there is nothing to reload.
 | --- | --- |
 | `cmd+i` | With a selection, sends `@src/foo.ts#L10-L20` to Claude's input. With no selection, just opens or focuses Claude. |
 | `cmd+shift+i` | Opens a **fresh** Claude Code session as a tab in the current editor group. |
-| `cmd+escape` | Extension default, not set here. Jumps into Claude's input, and back out to the editor. |
-
-`cmd+i` runs `claude-vscode.focus` rather than the more obvious `claude-vscode.insertAtMention`,
-because `focus` is the one that branches on whether anything is selected. The cost is that a bare
-`@src/foo.ts` whole-file mention is no longer available on that key.
 
 ### Visual Studio and Windows reflexes
 
@@ -116,10 +111,10 @@ Testing it immediately after unchecking may look like the change did nothing.
 If a restart still does not free it, the reported fix is *Input Sources > Restore Defaults*,
 then reboot, after which the key works whether or not the box is ticked.
 
-Worth knowing before you spend time on it: this is a long-standing mess. There is an open VS Code
-issue where `ctrl+space` reaches the OS fine, registering in System Settings' own shortcut
-recorder, yet never arrives in VS Code. If it works in TextEdit or a terminal but not in the
-editor, you have hit that and no local config will help.
+Worth knowing before you spend time on it: this is a long-standing mess. There is a [VS Code
+issue](https://github.com/microsoft/vscode/issues/198504) where `ctrl+space` reaches the OS fine,
+registering in System Settings' own shortcut recorder, yet never arrives in VS Code.
+In that case, no local config will help you.
 
 **Two `cmd+i` entries look redundant but are not.** `-inlineChat.start` appears twice, once with
 the verbatim default `when` clause and once bare. The bare one does the real work, because a
